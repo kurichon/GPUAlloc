@@ -27,7 +27,7 @@ class DeepLearningNetworks:
                    'dog', 'frog', 'horse', 'ship', 'truck'] # from cifar-10 website
     #lrdecay = 1e-1             
     
-    
+    #show the plot of accuracy
     def plot_accuracy(self,model):
         f,ax=plt.subplots(2,1,figsize=(10,10)) 
 
@@ -59,7 +59,7 @@ class DeepLearningNetworks:
                       metrics=['accuracy'])
         history = model.fit(self.train_images, self.train_labels, epochs=10, 
                             validation_data=(self.test_images, self.test_labels))
-        self.plot_accuracy(model)
+        #self.plot_accuracy(model)
         return model
        
     def train_alexnet(self):
