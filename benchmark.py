@@ -3,7 +3,9 @@ import os
 from threading import Thread , Timer
 import sched, time
 import csv
-import pbfile 
+import pbfile
+from tqdm import tqdm
+import datetime
 #from tf_cnn_benchmarks import tf_cnn_benchmarks as tf_cnn
 csv_header = ['GPU Util%', 'GPU Memory']
 timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -11,6 +13,17 @@ timestr = time.strftime("%Y%m%d-%H%M%S")
 with open('./data/' + timestr + '.csv', 'w+') as csv_file:
     writer = csv.DictWriter(csv_file, fieldnames=csv_header)
     writer.writeheader()
+    
+    
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+import os
+g_login = GoogleAuth()
+g_login.LocalWebserverAuth()
+drive = GoogleDrive(g_login)
+    
+    
+    
 # def get_gpu_memory():
 #     output_to_list = lambda x: x.decode('ascii').split('\n')[:-1]
 #     ACCEPTABLE_AVAILABLE_MEMORY = 1024
@@ -90,16 +103,95 @@ def get_gpu_resource_every_second():
     
 """
 Do stuff.
+Start thread
 """
-"""Hyperparameters"""
-hp_batch_size = [8,16,32,64]
-hp_optimizer = ['momentum','sgd','rmsprop','adam']
-hp_epoch = 10
-hp_fp16_flag = [True,False]
-hp_model =["AlexNet,"]
-#1 iteration
 stop_threads = False
 get_gpu_resource_every_second()
-DNN = pbfile.DeepLearningNetworks()
-model = DNN.start_cnn()
+"""Hyperparameters"""
+hp_model_imagenet =["vgg11","vgg16","vgg19","lenet","googlenet","overfeat","alexnet","trivial","inception3","inception4","resnet50","resnet101","resnet152","ncf","resnet50_v1.5","resnet101_v2","resnet101_v2"]
+hp_model_cifar = ["alexnet","trivial","resnet20_v2","resnet20","resnet32","resnet44","resnet56","resnet110"]
+gpu_model = ["GTX1080","RTX2070","Titan X"]
+hp_batch_size = [8,16,32,64]
+hp_optimizer = ['sgd','adam']
+hp_epoch = [10,20]
+hp_dataset = ["imagenet","cifar10"]
+"""
+Add --use-fp16
+"""
+#_hp_fp16_flag = [True,False]
+
+"""Other parameters"""
+hp_data_format = "NCHW"
+hp_variable_update = "replicated"
+hp_decay_rate = "1e-4"
+hp_num_gpus = 1
+hp_data_dir = "${DATA_DIR}"
+hp_train_dir = "${CKPT_DIR}"
+"""-nodistortions"""
+
+#iteration = (len(hp_model_imagenet)+len(hp_model_cifar))*len(hp_batch_size)*len(hp_optimizer)*2
+#for iteration in tqdm(iteration):
+
+with open('./data/' + timestr + '_logfile.txt', 'w+') as logfile:
+    logfile.write("Process has started\n")
+
+for _dset in hp_dataset:
+    if _dset == "imagenet":
+        for model in tqdm(hp_model_imagenet,desc='Imagenet_Models'):
+            #print("model")
+            for bsize in hp_batch_size:
+                #print("batch")
+                for opt in hp_optimizer:
+                    #print("optimizer")
+                    for _epoch in hp_epoch:
+        
+                        with open('./data/' + timestr + '_logfile.txt', 'a+') as logfile:
+                            logfile.writelines(
+                                "{0}_{1}_{2}_{3}_{4}_{5} has Started at {6}\n".format(gpu_model[0], model, bsize, opt, _epoch, _dset, datetime.datetime.now()))
+                       
+        
+                        """Do stuff model bsize opt epoch"""
+                        COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 --data_dir=${DATA_DIR} --train_dir=${CKPT_DIR}" + " --model={0} --batch_size={1} --optimizer={2} --num_epochs={3} --data_name={4}".format(model, bsize, opt, _epoch,_dset)
+                        sp.call(COMMAND.split(),stdout=subprocess.DEVNULL)
+                        """Do stuff"""
+        
+                        with open('./data/' + timestr + '_logfile.txt', 'a+') as logfile:
+                            logfile.writelines(
+                                "{0}_{1}_{2}_{3}_{4} has Finished at {5}\n".format(gpu_model[0], model, bsize, opt, _epoch, datetime.datetime.now()))
+                        #time.sleep(1) #5 minutes
+                    with open('./data/' + timestr + '_logfile.txt',"r") as file:
+                        file_drive = drive.CreateFile({'title':os.path.basename(file.name) })  
+                        file_drive.SetContentString(file.read()) 
+                        file_drive.Upload()
+    if _dset == "cifar10":
+        for model in tqdm(hp_model_imagenet,desc='Cifar10_Models'):
+            #print("model")
+            for bsize in hp_batch_size:
+                #print("batch")
+                for opt in hp_optimizer:
+                    #print("optimizer")
+                    for _epoch in hp_epoch:
+        
+                        with open('./data/' + timestr + '_logfile.txt', 'a+') as logfile:
+                            logfile.writelines(
+                                "{0}_{1}_{2}_{3}_{4}_{5} has Started at {6}\n".format(gpu_model[0], model, bsize, opt, _epoch, _dset, datetime.datetime.now()))
+                       
+        
+                        """Do stuff model bsize opt epoch"""
+                        COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 --data_dir=${DATA_DIR} --train_dir=${CKPT_DIR}" + " --model={0} --batch_size={1} --optimizer={2} --num_epochs={3} --data_name={4}".format(model, bsize, opt, _epoch,_dset)
+                        sp.call(COMMAND.split(),stdout=subprocess.DEVNULL)
+                        """Do stuff"""
+        
+                        with open('./data/' + timestr + '_logfile.txt', 'a+') as logfile:
+                            logfile.writelines(
+                                "{0}_{1}_{2}_{3}_{4} has Finished at {5}\n".format(gpu_model[0], model, bsize, opt, _epoch, datetime.datetime.now()))
+                        #time.sleep(1) #5 minutes
+                    with open('./data/' + timestr + '_logfile.txt',"r") as file:
+                        file_drive = drive.CreateFile({'title':os.path.basename(file.name) })  
+                        file_drive.SetContentString(file.read()) 
+                        file_drive.Upload()
+                
+
+#DNN = pbfile.DeepLearningNetworks()
+#model = DNN.start_cnn()
 stop_threads = True
