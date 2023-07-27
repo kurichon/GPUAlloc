@@ -10,9 +10,6 @@ import datetime
 csv_header = ['GPU Util%', 'GPU Memory']
 timestr = time.strftime("%Y%m%d-%H%M%S")
 #time_count = 1
-with open('./data/' + timestr + '.csv', 'w+') as csv_file:
-    writer = csv.DictWriter(csv_file, fieldnames=csv_header)
-    writer.writeheader()
     
     
 from pydrive.auth import GoogleAuth
@@ -70,11 +67,18 @@ def get_gpu_resource_every_second():
     """
         This function calls itself every 1 sec and print the gpu_memory and gpu_util.
     """
+    global code_name
+    global newfile_flag
+    if newfile_flag == True:
+        with open('./data/' + code_name + '.csv', 'w+') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=csv_header)
+            writer.writeheader()
+        newfile_flag = False
     gpu_resource = get_gpu_resource()
     #print(get_elapsed_time())
    # gpu_resource = [get_gpu_utilization(),get_gpu_memory()]
     print (gpu_resource)
-    with open('./data/' + timestr + '.csv', 'a+') as csv_file:
+    with open('./data/' + code_name + '.csv', 'a+') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=csv_header)
         #writer = writer.writerow(gpu_resource)
         #writer = writer.writerow({'GPU Util%': get_gpu_utilization(), 'GPU Memory': get_gpu_memory()})
@@ -100,13 +104,9 @@ def get_gpu_resource_every_second():
 #    writer = writer.writerow(csv_header)
     #writer = writer.writerow(get_gpu_resource_every_second())
 
-    
-"""
-Do stuff.
-Start thread
-"""
-stop_threads = False
-get_gpu_resource_every_second()
+
+
+
 """Hyperparameters"""
 hp_model_imagenet =["vgg11","vgg16","vgg19","lenet","googlenet","overfeat","alexnet","trivial","inception3","inception4","resnet50","resnet101","resnet152","ncf","resnet50_v1.5","resnet101_v2","resnet101_v2"]
 hp_model_cifar = ["alexnet","trivial","resnet20_v2","resnet20","resnet32","resnet44","resnet56","resnet110"]
@@ -129,12 +129,24 @@ hp_data_dir = "${DATA_DIR}"
 hp_train_dir = "${CKPT_DIR}"
 """-nodistortions"""
 
+
+
+
+    
+"""
+Do stuff.
+Start thread
+"""
+newfile_flag = True
+stop_threads = False
+code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(gpu_model[0], hp_model_imagenet[0], hp_batch_size[0], hp_optimizer[0], hp_epoch[0], hp_dataset[0])
+
+get_gpu_resource_every_second()
 #iteration = (len(hp_model_imagenet)+len(hp_model_cifar))*len(hp_batch_size)*len(hp_optimizer)*2
 #for iteration in tqdm(iteration):
 
 with open('./data/' + timestr + '_logfile.txt', 'w+') as logfile:
     logfile.write("Process has started\n")
-
 for _dset in hp_dataset:
     if _dset == "imagenet":
         for model in tqdm(hp_model_imagenet,desc='Imagenet_Models'):
@@ -144,21 +156,29 @@ for _dset in hp_dataset:
                 for opt in hp_optimizer:
                     #print("optimizer")
                     for _epoch in hp_epoch:
-        
                         with open('./data/' + timestr + '_logfile.txt', 'a+') as logfile:
                             logfile.writelines(
                                 "{0}_{1}_{2}_{3}_{4}_{5} has Started at {6}\n".format(gpu_model[0], model, bsize, opt, _epoch, _dset, datetime.datetime.now()))
-                       
         
                         """Do stuff model bsize opt epoch"""
-                        COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 --data_dir=${DATA_DIR} --train_dir=${CKPT_DIR}" + " --model={0} --batch_size={1} --optimizer={2} --num_epochs={3} --data_name={4}".format(model, bsize, opt, _epoch,_dset)
-                        sp.call(COMMAND.split(),stdout=subprocess.DEVNULL)
+                        COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 --data_dir=${DATA_DIR} --train_dir=${CKPT_DIR}"  + " --model={0} --batch_size={1} --optimizer={2} --num_epochs={3} --data_name={4}".format(model, bsize, opt, _epoch,_dset)
+                        os.system(COMMAND)
                         """Do stuff"""
-        
+                        #print (COMMAND.split() + ["--data_dir=${DATA_DIR}","--train_dir=${CKPT_DIR}"])
                         with open('./data/' + timestr + '_logfile.txt', 'a+') as logfile:
                             logfile.writelines(
                                 "{0}_{1}_{2}_{3}_{4} has Finished at {5}\n".format(gpu_model[0], model, bsize, opt, _epoch, datetime.datetime.now()))
-                        #time.sleep(1) #5 minutes
+                        
+                        """New model"""
+                        
+                        stop_threads = True
+                        time.sleep(300) #5 minutes
+                        code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(gpu_model[0], model, bsize, opt, _epoch, _dset)
+                        newfile_flag = True
+                        stop_threads = False                     
+                        get_gpu_resource_every_second()
+                        
+                        """ End 1 iteration"""
                     with open('./data/' + timestr + '_logfile.txt',"r") as file:
                         file_drive = drive.CreateFile({'title':os.path.basename(file.name) })  
                         file_drive.SetContentString(file.read()) 
@@ -171,6 +191,7 @@ for _dset in hp_dataset:
                 for opt in hp_optimizer:
                     #print("optimizer")
                     for _epoch in hp_epoch:
+                        code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(gpu_model[0], model, bsize, opt, _epoch, _dset)
         
                         with open('./data/' + timestr + '_logfile.txt', 'a+') as logfile:
                             logfile.writelines(
@@ -179,13 +200,22 @@ for _dset in hp_dataset:
         
                         """Do stuff model bsize opt epoch"""
                         COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 --data_dir=${DATA_DIR} --train_dir=${CKPT_DIR}" + " --model={0} --batch_size={1} --optimizer={2} --num_epochs={3} --data_name={4}".format(model, bsize, opt, _epoch,_dset)
-                        sp.call(COMMAND.split(),stdout=subprocess.DEVNULL)
+                        os.system(COMMAND)
                         """Do stuff"""
-        
                         with open('./data/' + timestr + '_logfile.txt', 'a+') as logfile:
                             logfile.writelines(
                                 "{0}_{1}_{2}_{3}_{4} has Finished at {5}\n".format(gpu_model[0], model, bsize, opt, _epoch, datetime.datetime.now()))
-                        #time.sleep(1) #5 minutes
+                        
+                        """Load new model"""
+                        
+                        stop_threads = True
+                        time.sleep(2) #5 minutes
+                        code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(gpu_model[0], model, bsize, opt, _epoch, _dset)
+                        newfile_flag = True
+                        stop_threads = False                     
+                        get_gpu_resource_every_second()
+                        
+                        """ End 1 iteration"""
                     with open('./data/' + timestr + '_logfile.txt',"r") as file:
                         file_drive = drive.CreateFile({'title':os.path.basename(file.name) })  
                         file_drive.SetContentString(file.read()) 
