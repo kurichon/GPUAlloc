@@ -6,8 +6,9 @@ import csv
 import pbfile
 from tqdm import tqdm
 import datetime
+import psutil
 #from tf_cnn_benchmarks import tf_cnn_benchmarks as tf_cnn
-csv_header = ['GPU Util%', 'GPU Memory']
+csv_header = ['GPU Util%', 'GPU Memory','CPU Util%']
 timestr = time.strftime("%Y%m%d-%H%M%S")
 #time_count = 1
     
@@ -54,7 +55,7 @@ def get_gpu_resource():
     gpu_util_values = [int(x.split()[0]) for i, x in enumerate(gpu_info)]
     memory_use_values = [int(x.split()[2]) for i, x in enumerate(gpu_info)]
 
-    return [str(gpu_util_values[0]),str(memory_use_values[0])]
+    return [str(gpu_util_values[0]),str(memory_use_values[0]),str(psutil.cpu_percent())]
 def get_gpu_resource_every_second():
     """
         This function calls itself every 1 sec and print the gpu_memory and gpu_util.
@@ -74,7 +75,7 @@ def get_gpu_resource_every_second():
         writer = csv.DictWriter(csv_file, fieldnames=csv_header)
         #writer = writer.writerow(gpu_resource)
         #writer = writer.writerow({'GPU Util%': get_gpu_utilization(), 'GPU Memory': get_gpu_memory()})
-        writer = writer.writerow({'GPU Util%': gpu_resource[0], 'GPU Memory': gpu_resource[1]})
+        writer = writer.writerow({'GPU Util%': gpu_resource[0], 'GPU Memory': gpu_resource[1],'CPU Util%': gpu_resource[2]})
 
     global stop_threads
     if stop_threads:
@@ -100,7 +101,7 @@ def get_gpu_resource_every_second():
 
 
 """Hyperparameters"""
-hp_model_imagenet =["vgg11","vgg16","vgg19","lenet","googlenet","overfeat","alexnet","trivial","inception3","inception4","resnet50","resnet101","resnet152","ncf","resnet50_v1.5","resnet101_v2","resnet101_v2"]
+hp_model_imagenet =["vgg11","vgg16","vgg19","lenet","googlenet","overfeat","alexnet","trivial","inception3","inception4","resnet50","resnet101","resnet152","ncf","resnet50_v1.5","resnet101_v2"]
 hp_model_cifar = ["alexnet","trivial","resnet20_v2","resnet20","resnet32","resnet44","resnet56","resnet110"]
 gpu_model = ["GTX1080","RTX2070","Titan X"]
 hp_batch_size = [8,16,32,64]
