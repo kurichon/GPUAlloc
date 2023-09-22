@@ -150,7 +150,7 @@ def start_training(test_flag):
                         # --gpu_memory_frac_for_testing 0.3 limits gpu usage
                         """Do stuff model bsize opt epoch"""
                         COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --graph_file ./data/graph_models/{0}.pbtxt --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 ".format(
-                                code_name) + "--data_dir=${DATA_DIR} --train_dir=${CKPT_DIR}" + " --model={0} --batch_size=32 --optimizer={2} --num_epochs=5 --data_name={4}".format(
+                                code_name) + "--data_dir=${DATA_DIR} --train_dir=${CKPT_DIR}" + " --model={0} --batch_size={1} --optimizer={2} --num_epochs={3} --data_name={4}".format(
                         test_model, '32', 'sgd', '5',_dset)
                         os.system(COMMAND)
                         """Do stuff"""
@@ -198,7 +198,7 @@ def start_training(test_flag):
                 
                                 """Do stuff model bsize opt epoch"""
                                 COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --graph_file ./graph_models/{0}.pbtxt --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 ".format(
-                                code_name) + "--data_dir=${data_dir} --train_dir=${ckpt_dir}" + " --model={0} --batch_size=32 --optimizer={2} --num_epochs=1 --data_name={4}".format(
+                                code_name) + "--data_dir=${data_dir} --train_dir=${ckpt_dir}" + " --model={0} --batch_size={1} --optimizer={2} --num_epochs={3} --data_name={4}".format(
                                 model, bsize, opt, _epoch,_dset)
                                 os.system(COMMAND)
                                 """Do stuff"""
