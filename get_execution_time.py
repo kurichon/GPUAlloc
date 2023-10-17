@@ -20,7 +20,7 @@ dfs = []
 hp_model = ["vgg11","vgg16","vgg19","googlenet","_lenet","densenet40-k12","densenet100-k12","inception3","inception4","resnet20","resnet50","resnet101"]
 exec_time = []
 #filename =  "/data_sample.csv"
-path = 'data/Real Data'
+path = 'data/Real Data/GTX1080_cifar10/'
 #path = 'data/GTX1080_cifar10/'
 #path = 'data/TitanX_cifar10/'
 #path = 'data/GTX1080_cifar10/'
@@ -34,6 +34,10 @@ for subdir, dirs, files in os.walk(path):
             list_of_logfiles += os.path.join(subdir,file) + '\n'
 list_of_logfiles = list(filter(None,list_of_logfiles.split('\n')))
 print(list_of_logfiles)
+
+count = 0
+found_exec = False
+
 for logfile in list_of_logfiles:
     with open(logfile,'r') as _file:
         #for model in hp_model:
@@ -42,11 +46,16 @@ for logfile in list_of_logfiles:
             for line in _file:
                 for model in hp_model:
                     if model in line:
-                        print(model)
-                        count +1
-                        count +1
-                        if count = 2
-                            get exec time
+                        if found_exec == True:
+                            found_exec = False
+                        else:
+                            print(line)
+                        
+                    if "Execution Time" in line:
+                        found_exec = True
+                        print(line.split(': ')[1].replace('\n',""))
+                        break
+                        get model line and exec line to get the exec time for each configuration types
             #        if start == 0:
                   #      start = datetime.strptime(line.split('at ')[1].replace('\n',''), '%Y-%m-%d %H:%M:%S.%f')
                         
