@@ -40,6 +40,7 @@ _model_name_to_imagenet_model = {
     'googlenet': googlenet_model.GooglenetModel,
     'overfeat': overfeat_model.OverfeatModel,
     
+    'resnet20': resnet_model.create_resnet20_cifar_model,
     
     'densenet40-k12': densenet_model.create_densenet40_k12_model,
     'densenet100-k12': densenet_model.create_densenet100_k12_model,
@@ -51,7 +52,6 @@ _model_name_to_imagenet_model = {
     'inception3': inception_model.Inceptionv3Model,
     'inception4': inception_model.Inceptionv4Model,
     
-    'resnet20': resnet_model.create_resnet20_cifar_model,
     'official_resnet18_v2':
         partial(official_resnet_model.ImagenetResnetModel, 18),
     'official_resnet34_v2':
@@ -100,7 +100,9 @@ _model_name_to_cifar_model = {
     
     'densenet40-k12': densenet_model.create_densenet40_k12_model,
     'densenet100-k12': densenet_model.create_densenet100_k12_model,
-    
+
+    'resnet50': resnet_model.create_resnet50_model,
+    'resnet101': resnet_model.create_resnet101_model,
     
     'alexnet': alexnet_model.AlexnetCifar10Model,
     'resnet20': resnet_model.create_resnet20_cifar_model,
