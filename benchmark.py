@@ -72,15 +72,15 @@ def get_gpu_resource_every_second():
 """Hyperparameters"""
 hp_model_imagenet =["vgg11","vgg16","vgg19","googlenet","lenet","alexnet","trivial"]
 hp_model_cifar = ["alexnet","trivial","resnet20_v2","resnet20","resnet32","resnet44","resnet56","resnet110"]
-hp_model = ["vgg11","vgg16","vgg19","googlenet","lenet","densenet40_k12","densenet100_k12","inception3","inception4","resnet44","resnet56","resnet110"]
+hp_model = ["vgg11","vgg16","vgg19","googlenet","lenet","densenet40-k12","densenet100-k12","inception3","inception4","resnet20","resnet50","resnet101"]
 #hp_model_cifar = ["vgg11"]#,#"lenet"]
-gpu_model = ["RTX2070"]#,"RTX2070","TitanX"]
+gpu_model = ["GTX1080"]#,"RTX2070","TitanX"]
 hp_batch_size = [8,16,32,64]
 hp_optimizer = ['sgd','adam']
 hp_epoch = [10,20]
 hp_dataset = ["cifar10","imagenet"]
-hp_test_dataset = ["cifar10"]
-hp_test_model = ["resnet44"]
+hp_test_dataset = ["imagenet"]
+hp_test_model = ["resnet20"]
 """
 Add --use-fp16
 """
@@ -110,7 +110,7 @@ def start_training(test_flag):
                     for test_model in tqdm(hp_test_model,desc='Test_Models'):
                                 
                         start_time = datetime.datetime.now()
-                        data_path = './data/{0}_{1}/'.format(gpu,_dset)
+                        data_path = './test_data/{0}_{1}/'.format(gpu,_dset)
                         
                         check_if_directory_exists(data_path)
                                 
@@ -211,7 +211,7 @@ Start thread
 """
 
 
-
+test_run = False
 newfile_flag = True
 stop_threads = False
 code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(gpu_model[0], hp_model_imagenet[0], hp_batch_size[0], hp_optimizer[0], hp_epoch[0], hp_dataset[0])
@@ -219,6 +219,6 @@ data_path = "./data/{0}_{1}/".format(gpu_model[0],hp_dataset[0])
 get_gpu_resource_every_second()
 iteration = (len(hp_model_imagenet)+len(hp_model_cifar))*len(hp_batch_size)*len(hp_optimizer)*2
 
-start_training(False)
+start_training(test_run)
 
 stop_threads = True
