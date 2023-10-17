@@ -16,7 +16,7 @@ file_list = []
 dfs = []
 #os.listdir('dir_path'): Return the list of files and directories in a specified directory path.
 
-hp_model = ["vgg11","vgg16","vgg19","googlenet","lenet","densenet40_k12","densenet100_k12","inception3","inception4","resnet44","resnet56","resnet110"]
+hp_model = ["vgg11","vgg16","vgg19","googlenet","lenet","densenet40-k12","densenet100-k12","inception3","inception4","resnet20","resnet50","resnet101"]
 #filename =  "/data_sample.csv"
 #path = 'data/GTX1080_imagenet/'
 #path = 'data/GTX1080_cifar10/'
