@@ -7,6 +7,10 @@ import csv
 
 from tqdm import tqdm
 
+#start = datetime.strptime("2023-10-21 01:43:59.850471", '%Y-%m-%d %H:%M:%S.%f')
+#end = datetime.strptime("2023-10-21 02:15:20.198397", '%Y-%m-%d %H:%M:%S.%f')
+#print(end - start)
+#exit()
 #optimize constants make constant.py
 #create representation per model
 
@@ -125,7 +129,7 @@ for gpu in gpu_model:
                                         #update to csv format
     
 print(list_exec_time)
-with open(exec_time_filename + '.csv', 'w+') as csv_file:
+with open(exec_time_filename, 'w+') as csv_file:
     writer = csv.DictWriter(csv_file, fieldnames=hyperparam_header)
     writer.writeheader()
     writer.writerows(list_exec_time)
