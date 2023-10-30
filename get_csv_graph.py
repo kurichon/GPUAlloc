@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import re
 import numpy as np
 import csv
+import constants
 #optimize constants make constant.py
 #create representation per model
 
@@ -12,18 +13,18 @@ import csv
 
 
 
-hyperparam_header = ['GPU', 'Model','Batch Size','Optimizer','Epoch','Dataset','Execution Time']
+#constants.hyperparam_header = ['GPU', 'Model','Batch Size','Optimizer','Epoch','constants.dataset','Execution Time']
 file_list = []
 dfs = []
 #os.listdir('dir_path'): Return the list of files and directories in a specified directory path.
 
-hp_model = ["vgg11","vgg16","vgg19","googlenet","_lenet","densenet40-k12","densenet100-k12","inception3","inception4","resnet20","resnet50","resnet101"]
+#constants.hp_model = ["vgg11","vgg16","vgg19","googlenet","_lenet","densenet40-k12","densenet100-k12","inception3","inception4","resnet20","resnet50","resnet101"]
 
-gpu_model = ["GTX1080","RTX2070","TitanX"]
-hp_batch_size = [8,16,32,64]
-hp_optimizer = ['sgd','adam']
-hp_epoch = [10,20]
-hp_dataset = ["cifar10","imagenet"]
+#constants.gpu_model = ["GTX1080","RTX2070","TitanX"]
+#constants.hp_batch_size = [8,16,32,64]
+#constants.hp_optimizer = ['sgd','adam']
+#constants.hp_epoch = [10,20]
+#hp_constants.dataset = ["cifar10","imagenet"]
 
 #filename =  "/data_sample.csv"
 
@@ -31,22 +32,22 @@ hp_dataset = ["cifar10","imagenet"]
 #path = 'data/GTX1080_cifar10/'
 #path = 'data/TitanX_cifar10/'
 #path = 'data/Real Data/RTX2070_cifar10/'
-path = './exec_time.csv'
-df = pd.read_csv(path)
+#path = './exec_time.csv'
+df = pd.read_csv(constants.exec_time_filename)
                                                                                                                                                                        
 gpu_df = [] #gtx1080,rtx2070,titanx
 gpu_opt_df = [] #GPU , #sgd,adam,  0-1 , 2-3, 4-5
 gpu_opt_bsize_df=[] #0-8, 9-15, 16-23
 gpu_opt_epoch_df=[] #0-3, 4-7,8-11
-for gpu in gpu_model:
+for gpu in constants.gpu_model:
     gpu_df.append(df.loc[df['GPU'] == gpu])
-    for opt in hp_optimizer:
+    for opt in constants.hp_optimizer:
         gpu_opt_df.append(gpu_df[len(gpu_df)-1].loc[df['Optimizer'] == opt])
-        for bsize in hp_batch_size:
+        for bsize in constants.hp_batch_size:
             gpu_opt_bsize_df.append(gpu_opt_df[len(gpu_opt_df)-1].loc[df['Batch Size'] == bsize])
-        for _epoch in hp_epoch:
+        for _epoch in constants.hp_epoch:
             gpu_opt_epoch_df.append(gpu_opt_df[len(gpu_opt_df)-1].loc[df['Epoch'] == _epoch])
-#for _epoch in hp_epoch:
+#for _epoch in constants.hp_epoch:
 #    for opt in range(len(gpu_opt_df)):
  #       gpu_opt_epoch_df.append(gpu_opt_df[opt].loc[df['Epoch'] == _epoch])
                 

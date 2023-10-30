@@ -7,8 +7,11 @@ import csv
 from tqdm import tqdm
 import datetime
 import psutil
+import constants
+
 #from tf_cnn_benchmarks import tf_cnn_benchmarks as tf_cnn
-csv_header = ['GPU Util%','GPU Mem Util%', 'GPU Memory','CPU Util%','tx','rx']
+#constants.csv_header = ['GPU Util%','GPU Mem Util%', 'GPU Memory','CPU Util%','tx','rx']
+
 timestr = time.strftime("%Y%m%d-%H%M%S")
 
 def check_if_directory_exists(path):
@@ -27,7 +30,7 @@ def get_gpu_resource():
     
     output_to_list = lambda x: x.decode('ascii').split('\n')[:-1]
     ACCEPTABLE_AVAILABLE_MEMORY = 1024
-    COMMAND = "nvidia-smi --query-gpu=utilization.gpu,utilization.memory,memory.used --format=csv"
+    COMMAND = constants.cmd_gpu
     try:
         gpu_info = output_to_list(sp.check_output(COMMAND.split(),stderr=sp.STDOUT))[1:]
     except sp.CalledProcessError as e:
@@ -51,15 +54,16 @@ def get_gpu_resource_every_second():
     
     if newfile_flag == True:
         with open(data_path + code_name + '.csv', 'w+') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=csv_header)
+            writer = csv.DictWriter(csv_file, fieldnames=constants.csv_header)
             writer.writeheader()
         newfile_flag = False
     gpu_resource = get_gpu_resource()
     
     #print (gpu_resource)
     with open(data_path + code_name + '.csv', 'a+') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=csv_header)
-        writer = writer.writerow({'GPU Util%': gpu_resource[0], 'GPU Mem Util%': gpu_resource[1],'GPU Memory': gpu_resource[2],'CPU Util%': gpu_resource[3],'tx': 0, 'rx': 0})
+        writer = csv.DictWriter(csv_file, fieldnames=constants.csv_header)
+        writer = writer.writerow({constants.csv_header[0]: gpu_resource[0], constants.csv_header[1]: gpu_resource[1],constants.csv_header[2]: gpu_resource[2],
+        constants.csv_header[3]: gpu_resource[3],constants.csv_header[4]: 0, constants.csv_header[5]: 0})
 
     global stop_threads
     if stop_threads:
@@ -70,15 +74,15 @@ def get_gpu_resource_every_second():
 
 
 """Hyperparameters"""
-hp_model_imagenet =["vgg11","vgg16","vgg19","googlenet","lenet","alexnet","trivial"]
-hp_model_cifar = ["alexnet","trivial","resnet20_v2","resnet20","resnet32","resnet44","resnet56","resnet110"]
-hp_model = ["vgg11","vgg16","vgg19","googlenet","lenet","densenet40-k12","densenet100-k12","inception3","inception4","resnet20","resnet50","resnet101"]
-#hp_model_cifar = ["vgg11"]#,#"lenet"]
-gpu_model = ["GTX1080"]#,"RTX2070","TitanX"]
-hp_batch_size = [8,16,32,64]
-hp_optimizer = ['sgd','adam']
-hp_epoch = [10,20]
-hp_dataset = ["cifar10","imagenet"]
+#constants.hp_model_imagenet =["densenet40-k12","densenet100-k12","resnet20"]
+#constants.hp_model_cifar = ["densenet40-k12","densenet100-k12","resnet20","resnet50","resnet101"]
+#constants.hp_model = ["vgg11","vgg16","vgg19","googlenet","lenet","densenet40-k12","densenet100-k12","inception3","inception4","resnet20","resnet50","resnet101"]
+#constants.hp_model_cifar = ["vgg11"]#,#"lenet"]
+#constants.gpu_model_training = ["GTX1080"]#,"RTX2070","TitanX"]
+#constants.hp_batch_size = [8,16,32,64]
+#constants.hp_optimizer = ['sgd','adam']
+#constants.hp_epoch = [10,20]
+#constants.hp_dataset = ["cifar10","imagenet"]
 hp_test_dataset = ["imagenet"]
 hp_test_model = ["resnet20"]
 """
@@ -102,10 +106,10 @@ def start_training(test_flag):
     global code_name
     check_if_directory_exists(data_path)
     
-    with open(data_path + timestr + '_logfile.txt', 'w+') as logfile:
-        logfile.write("Process has started\n")
+    with open(data_path + timestr + constants.logfile_name, 'w+') as logfile:
+        logfile.write(constants.process_start_report)
     if test_flag == True:
-        for gpu in gpu_model:
+        for gpu in constants.gpu_model_training:
             for _dset in hp_test_dataset:
                     for test_model in tqdm(hp_test_model,desc='Test_Models'):
                                 
@@ -147,19 +151,19 @@ def start_training(test_flag):
                         time.sleep(300) #5 minutes
                                     
     else:
-        for gpu in gpu_model:
-            for _dset in hp_dataset:
+        for gpu in constants.gpu_model_training:
+            for _dset in constants.hp_dataset:
                 #if _dset == "imagenet":
-                #    models_to_load = hp_model_imagenet
+                #    models_to_load = constants.hp_model_imagenet
                 #elif _dset == "cifar10":
-                #    models_to_load = hp_model_cifar
-                for model in tqdm(hp_model,desc='models'):
-                    for bsize in hp_batch_size:
-                        for _epoch in hp_epoch:
-                            for opt in hp_optimizer:
+                #    models_to_load = constants.hp_model_cifar
+                for model in tqdm(constants.hp_model_training,desc='models'):
+                    for bsize in constants.hp_batch_size:
+                        for _epoch in constants.hp_epoch:
+                            for opt in constants.hp_optimizer:
                                 
                                 start_time = datetime.datetime.now()
-                                data_path = './data/{0}_{1}/'.format(gpu,_dset)
+                                data_path = constants.training_data_path.format(gpu,_dset)
                                 
                                 check_if_directory_exists(data_path)
                                 
@@ -170,9 +174,9 @@ def start_training(test_flag):
                                     pass
                                 
                                 
-                                with open(data_path + timestr + '_logfile.txt', 'a+') as logfile:
+                                with open(data_path + timestr + constants.logfile_name, 'a+') as logfile:
                                     logfile.writelines(
-                                        "{0}_{1}_{2}_{3}_{4}_{5} has Started at {6}\n".format(
+                                        constants.job_start_report.format(
                                         gpu, model, bsize, opt, _epoch, _dset, start_time))
                                 
                                 code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(gpu, model, bsize, opt, _epoch, _dset)
@@ -186,14 +190,14 @@ def start_training(test_flag):
                                 model, bsize, opt, _epoch,_dset)
                                 os.system(COMMAND)
                                 """Do stuff"""
-                                print(COMMAND)
+                                #print(COMMAND)
                                 end_time = datetime.datetime.now()
                                 
-                                with open(data_path + timestr + '_logfile.txt', 'a+') as logfile:
+                                with open(data_path + timestr + constants.logfile_name, 'a+') as logfile:
                                     logfile.writelines(
-                                        "{0}_{1}_{2}_{3}_{4} has Finished at {5}\n".format(
+                                        constants.job_done_report.format(
                                         gpu, model, bsize, opt, _epoch, end_time))
-                                    logfile.writelines("Execution Time: {0}\n".format(end_time-start_time))
+                                    logfile.writelines(constants.execution_time_entry.format(end_time-start_time))
                                 """Buffer time to show unloading of model"""
                                 time.sleep(5)  
                                 """New model"""
@@ -214,10 +218,10 @@ Start thread
 test_run = False
 newfile_flag = True
 stop_threads = False
-code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(gpu_model[0], hp_model_imagenet[0], hp_batch_size[0], hp_optimizer[0], hp_epoch[0], hp_dataset[0])
-data_path = "./data/{0}_{1}/".format(gpu_model[0],hp_dataset[0])
+code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(constants.gpu_model_training[0], constants.hp_model[0], constants.hp_batch_size[0], constants.hp_optimizer[0], constants.hp_epoch[0], constants.hp_dataset[0])
+data_path = constants.training_data_path.format(constants.gpu_model_training[0],constants.hp_dataset[0])
 get_gpu_resource_every_second()
-iteration = (len(hp_model_imagenet)+len(hp_model_cifar))*len(hp_batch_size)*len(hp_optimizer)*2
+jobs = len(constants.hp_model)*len(constants.hp_batch_size)*len(constants.hp_optimizer)*2
 
 start_training(test_run)
 
