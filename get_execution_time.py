@@ -53,10 +53,6 @@ list_exec_time = []
 
 for gpu in constants.gpu_model:
         for _dset in constants.hp_dataset:
-            #if _dset == "imagenet":
-            #    models_to_load = hp_model_imagenet
-            #elif _dset == "cifar10":
-            #    models_to_load = hp_model_cifar
             for model in tqdm(constants.hp_model,desc='models'):
                 for bsize in constants.hp_batch_size:
                     for _epoch in constants.hp_epoch:
