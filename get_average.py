@@ -8,6 +8,7 @@ import constants
 from tqdm import tqdm
 import csv
 import itertools
+import sys
 
 
 # try:
@@ -23,13 +24,14 @@ model_iterations = len(constants.hp_batch_size) * len(constants.hp_optimizer) * 
 #print(model_iterations)
 timestr = time.strftime("%Y%m%d-%H%M%S")
 perf_list = []
+df_exec = pd.read_csv(constants.exec_time_filename)
 
 with open('./data/' + timestr + '_average_logfile.txt', 'w+') as logfile:
     logfile.write("Process has started\n")
     
     for gpu in constants.gpu_model:
         for _dset in constants.hp_dataset:
-            for model in tqdm(constants.hp_model_training,desc='models'):
+            for model in tqdm(constants.hp_model_node_freq,desc='models'):
                 #print("model")
                 average_mem = 0
                 average_util = 0
@@ -41,7 +43,11 @@ with open('./data/' + timestr + '_average_logfile.txt', 'w+') as logfile:
                             code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(gpu, model, bsize, opt, _epoch, _dset)
                             gpu_dataset_path = constants.real_data_path.format(gpu,_dset)
                             """Read File"""
-                            try: 
+                            try:
+                                #get execution time
+                                exec_time = float((df_exec[(df_exec[constants.hyperparam_header[0]] == gpu) & (df_exec[constants.hyperparam_header[1]] == model) & (df_exec[constants.hyperparam_header[2]] == bsize)
+                                & (df_exec[constants.hyperparam_header[3]] == opt) & (df_exec[constants.hyperparam_header[4]] == _epoch) &(df_exec[constants.hyperparam_header[5]] == _dset)][constants.hyperparam_header[6]]))
+                                print(exec_time)
                                 df = pd.read_csv(gpu_dataset_path + code_name+".csv")
                                 df_new = df[["GPU Util%","GPU Mem Util%","GPU Memory","CPU Util%"]]
                                 size = len(df_new)
@@ -49,7 +55,7 @@ with open('./data/' + timestr + '_average_logfile.txt', 'w+') as logfile:
                                 average_mem += df["GPU Memory"].sum()/size
                                 average_mem_util += df["GPU Mem Util%"].sum()/size
                                 average_cpu_util += df["CPU Util%"].sum()/size
-                                perf_list.append(generate_perf_file.generate_parameters(df_new, gpu,code_name))
+                                perf_list.append(generate_perf_file.generate_parameters(df_new, gpu,code_name,exec_time))
                                 #logfile.writelines(code_name + "; Average GPU Util%, Gpu Memory= {0} , {1}\n".format(average_util, average_mem))
                             except FileNotFoundError:                
                                 logfile.writelines(

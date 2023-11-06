@@ -11,7 +11,7 @@ import constants
 #data = pd.read_csv("./data/CNN.csv")
 #data['row_number'] = data.reset_index().index
 """data is pandas dataframe"""
-def generate_parameters(data,gpu,codename):
+def generate_parameters(data,gpu,codename,exec_time):
     codename = codename.split('_')
     perf_list_to_return = []
     for column in data:
@@ -54,7 +54,7 @@ def generate_parameters(data,gpu,codename):
             perf_list_to_return.append({constants.perf_file_header[0]:codename[0],constants.perf_file_header[1]:codename[1],
             constants.perf_file_header[2]:codename[2],constants.perf_file_header[3]:codename[3],constants.perf_file_header[4]:codename[4],
             constants.perf_file_header[5]:codename[5],constants.perf_file_header[6]:column,constants.perf_file_header[7]:avg_burst_time,
-            constants.perf_file_header[8]:avg_idle_time,constants.perf_file_header[9]:avg_peak_consumption})# +',{0},{1},{2},{3}\n'.format(column,avg_burst_time,avg_idle_time,avg_peak_consumption))
+            constants.perf_file_header[8]:avg_idle_time,constants.perf_file_header[9]:avg_peak_consumption,constants.perf_file_header[10]:exec_time})# +',{0},{1},{2},{3}\n'.format(column,avg_burst_time,avg_idle_time,avg_peak_consumption))
     return perf_list_to_return
 
         #writer = writer.writerow(gpu_resource)

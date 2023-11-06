@@ -53,7 +53,7 @@ list_exec_time = []
 
 for gpu in constants.gpu_model:
         for _dset in constants.hp_dataset:
-            for model in tqdm(constants.hp_model,desc='models'):
+            for model in tqdm(constants.hp_model_node_freq,desc='models'):
                 for bsize in constants.hp_batch_size:
                     for _epoch in constants.hp_epoch:
                         for opt in constants.hp_optimizer:
@@ -61,7 +61,7 @@ for gpu in constants.gpu_model:
                                 with open(logfile,'r') as _file: 
                                     for line in _file:  
                                         
-                                        if constants.job_done_report.format(
+                                        if constants.job_done_report_exec.format(
                                         gpu, model, bsize, opt, _epoch)in line:
                                             
                                             dataset = _file.name.split("_")[1].split("/")[0]
@@ -75,9 +75,12 @@ for gpu in constants.gpu_model:
 
                                         #update to csv format
     
-print(list_exec_time)
+#print(list(set(list_exec_time)))
 with open(constants.exec_time_filename, 'w+') as csv_file:
     writer = csv.DictWriter(csv_file, fieldnames=constants.hyperparam_header)
     writer.writeheader()
     writer.writerows(list_exec_time)
-
+#remove duplicates
+df_exec = pd.read_csv(constants.exec_time_filename)
+df_exec.drop_duplicates(subset=None,inplace=True)
+df_exec.to_csv(constants.exec_time_filename,index=False)
