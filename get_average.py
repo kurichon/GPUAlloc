@@ -1,3 +1,4 @@
+"""Generates perf file"""
 import pandas
 import os
 import pandas as pd
