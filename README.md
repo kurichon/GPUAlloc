@@ -5,7 +5,7 @@
   
 **Directories:**
 - /networks contains the generative networks
-- CNN models are found in /tf_cnn_benchmarks
+- CNN models are found in /tf_cnn_benchmarks (https://github.com/tensorflow/benchmarks/blob/master/scripts/tf_cnn_benchmarks)
 - /driple contains all the scripts used for training
 - /data contains all the collected data for the research
   
