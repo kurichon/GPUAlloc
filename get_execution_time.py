@@ -1,3 +1,5 @@
+"""Extracts execution time from .log files"""
+
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
