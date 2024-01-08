@@ -1,3 +1,4 @@
+"""Job profiler to measure resource consumption values during training"""
 import subprocess as sp
 import os
 from threading import Thread , Timer
