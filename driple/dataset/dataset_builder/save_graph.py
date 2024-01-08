@@ -63,7 +63,7 @@ def in_result_file(result, before_model_list):
 def save_graph(perf_result, b_size, n_of_groups, n_of_graphs, save_path, dataset_name):
     result = pd.read_csv(perf_result)
 
-    pbtxt_folder_path = "features/TitanX/"
+    pbtxt_folder_path = "features/"
     nodetype_file = "features/node-frequency.csv"
     model_list = find_model_list(pbtxt_folder_path)
     model_list, model_graph_label_dict = in_result_file(result, model_list)
