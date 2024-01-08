@@ -46,7 +46,7 @@ process_start_report = "Process has started\n"
 job_start_report_driple = '{0}_{1} has Started at {2}\n' # {0} gpu, {1} model, {2} time
 job_done_report_driple =  '{0}_{1} has Finished at {2}'  # {0} gpu, {1} model, {2} time
 job_start_report = '{0}_{1}_{2}_{3}_{4}_{5} has Started at {6}\n' # {0} gpu, {1} model, {2} bsize, {3} opt, {4} _epoch , {5} dataset, {6} time
-job_done_report =  '{0}_{1}_{2}_{3}_{4} has Finished at {5}'  # {0} gpu, {1} model, {2} bsize, {3} opt, {4} _epoch, {5} time
+job_done_report =  '{0}_{1}_{2}_{3}_{4} has Finished at {5}\n'  # {0} gpu, {1} model, {2} bsize, {3} opt, {4} _epoch, {5} time
 job_done_report_exec =  '{0}_{1}_{2}_{3}_{4} has Finished at '  # {0} gpu, {1} model, {2} bsize, {3} opt, {4} _epoch, {5} time
 execution_time_entry = 'Execution Time: {0}\n' #{0} Execution Time
 command_driple_train = "python ./driple/training/gcn.py --variable --gru --epochs=100000 --patience=1000 --variable_conv_layers=Nover2 --only_graph --hidden=64 --mlp_layers=3 --fixed "
