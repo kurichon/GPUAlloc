@@ -1,9 +1,0 @@
-Process has started
-TitanX_resnet110_64_sgd_10_cifar10 has Started at 2023-08-10 12:59:19.152548
-TitanX_resnet110_64_sgd_10 has Finished at 2023-08-10 13:07:15.645301
-TitanX_resnet110_64_sgd_20_cifar10 has Started at 2023-08-10 13:12:15.745656
-TitanX_resnet110_64_sgd_20 has Finished at 2023-08-10 13:28:17.065561
-TitanX_resnet110_64_adam_10_cifar10 has Started at 2023-08-10 13:33:17.165903
-TitanX_resnet110_64_adam_10 has Finished at 2023-08-10 13:41:20.593073
-TitanX_resnet110_64_adam_20_cifar10 has Started at 2023-08-10 13:46:20.666959
-TitanX_resnet110_64_adam_20 has Finished at 2023-08-10 14:02:38.776171
