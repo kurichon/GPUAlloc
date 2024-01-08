@@ -6,6 +6,7 @@ from datetime import datetime
 import csv
 import constants
 from tqdm import tqdm
+import get_JCT
 
 #start = datetime.strptime("2023-10-21 01:43:59.850471", '%Y-%m-%d %H:%M:%S.%f')
 #end = datetime.strptime("2023-10-21 02:15:20.198397", '%Y-%m-%d %H:%M:%S.%f')
@@ -58,12 +59,12 @@ for gpu in constants.gpu_model:
                     for _epoch in constants.hp_epoch:
                         for opt in constants.hp_optimizer:
                             for logfile in list_of_logfiles:
-                                with open(logfile,'r') as _file: 
-                                    for line in _file:  
-                                        
+                                with open(logfile,'r') as _file:
+                                    for line in _file:
+
                                         if constants.job_done_report_exec.format(
                                         gpu, model, bsize, opt, _epoch)in line:
-                                            
+
                                             dataset = _file.name.split("_")[1].split("/")[0]
                                             exec_time = next(_file).split(": ")[1].replace("\n","")
                                             exec_time = sum(float(x) * 60 ** i for i, x in enumerate(reversed(exec_time.split(':'))))
@@ -83,4 +84,6 @@ with open(constants.exec_time_filename, 'w+') as csv_file:
 #remove duplicates
 df_exec = pd.read_csv(constants.exec_time_filename)
 df_exec.drop_duplicates(subset=None,inplace=True)
+df_exec[constants.hyperparam_header[6]]=(df_exec[constants.hyperparam_header[6]]-df_exec[constants.hyperparam_header[6]].min())/(df_exec[constants.hyperparam_header[6]].max()-df_exec[constants.hyperparam_header[6]].min())
 df_exec.to_csv(constants.exec_time_filename,index=False)
+#get_JCT.calc_JCT(0) #get exec times

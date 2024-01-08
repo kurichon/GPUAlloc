@@ -8,6 +8,9 @@ from tqdm import tqdm
 import datetime
 import psutil
 import constants
+#import networks.cvae as cvae
+#import networks.conditional_gan as cond_gan
+#import networks.dcgan as dcgan
 
 #from tf_cnn_benchmarks import tf_cnn_benchmarks as tf_cnn
 #constants.csv_header = ['GPU Util%','GPU Mem Util%', 'GPU Memory','CPU Util%','tx','rx']
@@ -83,8 +86,12 @@ def get_gpu_resource_every_second():
 #constants.hp_optimizer = ['sgd','adam']
 #constants.hp_epoch = [10,20]
 #constants.hp_dataset = ["cifar10","imagenet"]
-hp_test_dataset = ["imagenet"]
-hp_test_model = ["resnet20"]
+hp_new_dataset = ["mnist"]
+hp_new_models = ["gan"]
+
+
+hp_test_dataset = ["imagenet","cifar10"]
+hp_test_model = ["resnet32","trivial","alexnet"]
 """
 Add --use-fp16
 """
@@ -109,55 +116,57 @@ def start_training(test_flag):
     with open(data_path + timestr + constants.logfile_name, 'w+') as logfile:
         logfile.write(constants.process_start_report)
     if test_flag == True:
-        for gpu in constants.gpu_model_training:
             for _dset in hp_test_dataset:
-                    for test_model in tqdm(hp_test_model,desc='Test_Models'):
+                for test_model in tqdm(hp_test_model,desc='Test_Models'):
+                    for bsize in constants.hp_batch_size:
+                        for _epoch in constants.hp_epoch:
+                            for opt in constants.hp_optimizer:
+                            
+                                start_time = datetime.datetime.now()
+                                data_path = './data/{0}/'.format("eval_graphs")
                                 
-                        start_time = datetime.datetime.now()
-                        data_path = './test_data/{0}_{1}/'.format(gpu,_dset)
-                        
-                        check_if_directory_exists(data_path)
+                                check_if_directory_exists(data_path)
+                                        
+                                with open(data_path + timestr + '_logfile.txt', 'a+') as logfile:
+                                    logfile.writelines(
+                                        constants.job_start_report.format(
+                                        "eval", test_model, bsize, opt, _epoch, _dset, start_time))
                                 
-                        with open(data_path + timestr + '_logfile.txt', 'a+') as logfile:
-                            logfile.writelines(
-                                "{0}_{1}_{2}_{3}_{4}_{5} has Started at {6}\n".format(
-                                'TestGPU', test_model, '32', 'sgd', '1', _dset, start_time))
-                        
-                        code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format('TestGPU2', test_model, '32', 'sgd', '1', _dset)
-                        newfile_flag = True
-                        stop_threads = False                     
-                        get_gpu_resource_every_second()
-                        
-                        # --gpu_memory_frac_for_testing 0.3 limits gpu usage
-                        """Do stuff model bsize opt epoch"""
-                        COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --graph_file ./data/graph_models/{0}.pbtxt --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 ".format(
-                                code_name) + "--data_dir=${DATA_DIR} --train_dir=${CKPT_DIR}" + " --model={0} --batch_size=32 --optimizer={2} --num_epochs=5 --data_name={4}".format(
-                        test_model, '32', 'sgd', '5',_dset)
-                        os.system(COMMAND)
-                        """Do stuff"""
+                                code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format("eval", test_model, bsize, opt, _epoch, _dset)
+                                newfile_flag = True
+                                stop_threads = False                     
+                                get_gpu_resource_every_second()
                                 
-                        end_time = datetime.datetime.now()
-                                
-                        with open(data_path + timestr + '_logfile.txt', 'a+') as logfile:
-                            logfile.writelines(
-                                "{0}_{1}_{2}_{3}_{4} has Finished at {5}\n".format(
-                                'TestGPU', test_model, '32', 'sgd', '1', end_time))
-                            logfile.writelines("Execution Time: {0}\n".format(end_time-start_time))
-                        """Buffer time to show unloading of model"""
-                        print("Wait for buffer time")
-                        time.sleep(5)
-                        """New model"""
-                        stop_threads = True
-                        time.sleep(300) #5 minutes
+                                # --gpu_memory_frac_for_testing 0.3 limits gpu usage
+                                """Do stuff model bsize opt epoch"""
+                                COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --graph_file ./data/eval_graphs/{0}.pbtxt --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 ".format(
+                                code_name) + "--data_dir=${data_dir} --train_dir=${ckpt_dir}" + " --model={0} --batch_size={1} --optimizer={2} --num_epochs=0 --data_name={3}".format(
+                                test_model, bsize, opt,_dset)
+                                os.system(COMMAND)
+                                """Do stuff"""
+                                        
+                                end_time = datetime.datetime.now()
+                                        
+                                with open(data_path + timestr + constants.logfile_name, 'a+') as logfile:
+                                    logfile.writelines(
+                                    constants.job_start_report.format(
+                                    "eval", test_model, bsize, opt, _epoch, _dset, start_time))
+                                    logfile.writelines(constants.execution_time_entry.format(end_time-start_time))
+                                """Buffer time to show unloading of model"""
+                                print("Wait for buffer time")
+                                time.sleep(5)
+                                """New model"""
+                                stop_threads = True
+                                time.sleep(30) #5 minutes
                                     
     else:
         for gpu in constants.gpu_model_training:
-            for _dset in constants.hp_dataset:
+            for _dset in hp_new_dataset:
                 #if _dset == "imagenet":
                 #    models_to_load = constants.hp_model_imagenet
                 #elif _dset == "cifar10":
                 #    models_to_load = constants.hp_model_cifar
-                for model in tqdm(constants.hp_model_training,desc='models'):
+                for model in tqdm(hp_new_models,desc='models'):
                     for bsize in constants.hp_batch_size:
                         for _epoch in constants.hp_epoch:
                             for opt in constants.hp_optimizer:
@@ -185,9 +194,43 @@ def start_training(test_flag):
                                 get_gpu_resource_every_second()
                 
                                 """Do stuff model bsize opt epoch"""
-                                COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --graph_file ./data/{1}_{2}/graphs/{0}.pbtxt --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 ".format(
-                                code_name,gpu,_dset) + "--data_dir=${data_dir} --train_dir=${ckpt_dir}" + " --model={0} --batch_size={1} --optimizer={2} --num_epochs={3} --data_name={4}".format(
-                                model, bsize, opt, _epoch,_dset)
+                                if model == 'cvae':
+                                    sub_command= "import networks.cvae as cvae; cvae.train_vae('{0}',{1},{2},'{3}')".format(str(gpu),
+                                    _epoch,bsize,str(opt))
+                                    print(sub_command)
+                                    COMMAND = "python -c \"\"\"{0}\"\"\"".format(sub_command)
+                                    print(COMMAND)
+                                    #cvae.train_vae(gpu,_epoch,bsize,opt)
+                                elif model == 'dcgan':
+                                    
+                                    sub_command= "import networks.dcgan as dcgan; dcgan.train_gan('{0}',{1},{2},'{3}')".format(str(gpu),
+                                    _epoch,bsize,str(opt))
+                                    COMMAND = "python -c \"\"\"{0}\"\"\"".format(sub_command)
+                                    
+                                    #COMMAND = "python -c 'import networks.dcgan as dcgan; dcgan.train_gan({0},{1},{2},{3})'".format(gpu,_epoch,bsize,opt)
+                                    #dcgan.train_gan(gpu,_epoch,bsize,opt)
+                                elif model == 'conditionalgan':
+                                    
+                                    sub_command= "import networks.conditional_gan as cond_gan; cond_gan.train_cond_gan('{0}',{1},{2},'{3}')".format(gpu,
+                                    _epoch,bsize,opt)
+                                    COMMAND = "python -c \"\"\"{0}\"\"\"".format(sub_command)
+                                elif model == 'gan':
+                                    
+                                    sub_command= "import networks.dcgan as dcgan; dcgan.train_gan('{0}',{1},{2},'{3}',True)".format(str(gpu),
+                                    _epoch,bsize,str(opt))
+                                    COMMAND = "python -c \"\"\"{0}\"\"\"".format(sub_command)
+                                    #COMMAND = "python -c 'import networks.conditional_gan as cond_gan; cond_gan.train_cond_gan({0},{1},{2},{3})'".format(gpu,_epoch,bsize,opt)                           
+                                    #cond_gan.train_cond_gan(gpu,_epoch,bsize,opt)
+                                    
+                                elif model =='lstm':                                    
+                                    sub_command= "import networks.anomalyd as lstm; lstm.train_lstm('{0}',{1},{2},'{3}',True)".format(str(gpu),
+                                    _epoch,bsize,str(opt))
+                                    COMMAND = "python -c \"\"\"{0}\"\"\"".format(sub_command)
+                                
+
+                                #COMMAND = "python ./tf_cnn_benchmarks/tf_cnn_benchmarks.py --graph_file ./data/{1}_{2}/graphs/{0}.pbtxt --data_format=NCHW --variable_update=replicated --nodistortions --gradient_repacking=8 --num_gpus=1 --weight_decay=1e-4 ".format(
+                                #code_name,gpu,_dset) + "--data_dir=${data_dir} --train_dir=${ckpt_dir}" + " --model={0} --batch_size={1} --optimizer={2} --num_epochs={3} --data_name={4}".format(
+                                #model, bsize, opt, _epoch,_dset)
                                 os.system(COMMAND)
                                 """Do stuff"""
                                 #print(COMMAND)
@@ -218,8 +261,8 @@ Start thread
 test_run = False
 newfile_flag = True
 stop_threads = False
-code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(constants.gpu_model_training[0], constants.hp_model[0], constants.hp_batch_size[0], constants.hp_optimizer[0], constants.hp_epoch[0], constants.hp_dataset[0])
-data_path = constants.training_data_path.format(constants.gpu_model_training[0],constants.hp_dataset[0])
+code_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(constants.gpu_model_training[0], hp_new_models[0], constants.hp_batch_size[0], constants.hp_optimizer[0], constants.hp_epoch[0], hp_new_dataset[0])
+data_path = constants.training_data_path.format(constants.gpu_model_training[0],hp_new_dataset[0])
 get_gpu_resource_every_second()
 jobs = len(constants.hp_model)*len(constants.hp_batch_size)*len(constants.hp_optimizer)*2
 

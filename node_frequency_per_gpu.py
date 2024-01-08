@@ -44,11 +44,38 @@ if __name__ == '__main__':
                         for opt in constants.hp_optimizer:
                             #print(constants.graphs_data_path.format(gpu,model,bsize,opt,_epoch,_dset))
                             try:
-                                pbtxt_data = parse.import_pbtxt(constants.graphs_data_path.format(gpu,model,bsize,opt,_epoch,_dset))
-                                op_name = parse.pbtxt_extract_op_name(pbtxt_data)
-                                dataset_op_name_list.append(op_name)
-                                dataset_op_count_list.append({constants.hyperparam_header_2[0]: gpu, constants.hyperparam_header_2[1]: model, constants.hyperparam_header_2[2]: bsize,
-                                        constants.hyperparam_header_2[3]: opt, constants.hyperparam_header_2[4]: _epoch, constants.hyperparam_header_2[5]: _dset , constants.hyperparam_header_2[6]: len(op_name)})
+                                if model == "dcgan" or model == "gan" or model == "conditionalgan":
+                                    pbtxt_data = parse.import_pbtxt(constants.graphs_discriminator_data_path.format(gpu,model,bsize,opt,_epoch,_dset))
+                                    op_name = parse.pbtxt_extract_op_name_gan(pbtxt_data)
+                                    dataset_op_name_list.append(op_name)
+                                    dataset_op_count_list.append({constants.hyperparam_header_2[0]: gpu, constants.hyperparam_header_2[1]: model+"-discriminator", constants.hyperparam_header_2[2]: bsize,
+                                            constants.hyperparam_header_2[3]: opt, constants.hyperparam_header_2[4]: _epoch, constants.hyperparam_header_2[5]: _dset , constants.hyperparam_header_2[6]: len(op_name)})
+     #   print(dataset_op_name_list[0]) 
+                                    pbtxt_data = parse.import_pbtxt(constants.graphs_generator_data_path.format(gpu,model,bsize,opt,_epoch,_dset))
+                                    op_name = parse.pbtxt_extract_op_name_gan(pbtxt_data)
+                                    dataset_op_name_list.append(op_name)
+                                    dataset_op_count_list.append({constants.hyperparam_header_2[0]: gpu, constants.hyperparam_header_2[1]: model+"-generator", constants.hyperparam_header_2[2]: bsize,
+                                            constants.hyperparam_header_2[3]: opt, constants.hyperparam_header_2[4]: _epoch, constants.hyperparam_header_2[5]: _dset , constants.hyperparam_header_2[6]: len(op_name)})
+     #   print(dataset_op_name_list[0])
+                                if model == "cvae":
+                                    pbtxt_data = parse.import_pbtxt(constants.graphs_decoder_data_path.format(gpu,model,bsize,opt,_epoch,_dset))
+                                    op_name = parse.pbtxt_extract_op_name_gan(pbtxt_data)
+                                    dataset_op_name_list.append(op_name)
+                                    dataset_op_count_list.append({constants.hyperparam_header_2[0]: gpu, constants.hyperparam_header_2[1]: model+"-decoder", constants.hyperparam_header_2[2]: bsize,
+                                            constants.hyperparam_header_2[3]: opt, constants.hyperparam_header_2[4]: _epoch, constants.hyperparam_header_2[5]: _dset , constants.hyperparam_header_2[6]: len(op_name)})
+     #   print(dataset_op_name_list[0]) 
+                                    pbtxt_data = parse.import_pbtxt(constants.graphs_encoder_data_path.format(gpu,model,bsize,opt,_epoch,_dset))
+                                    op_name = parse.pbtxt_extract_op_name_gan(pbtxt_data)
+                                    dataset_op_name_list.append(op_name)
+                                    dataset_op_count_list.append({constants.hyperparam_header_2[0]: gpu, constants.hyperparam_header_2[1]: model+"-encoder", constants.hyperparam_header_2[2]: bsize,
+                                            constants.hyperparam_header_2[3]: opt, constants.hyperparam_header_2[4]: _epoch, constants.hyperparam_header_2[5]: _dset , constants.hyperparam_header_2[6]: len(op_name)})
+     #   print(dataset_op_name_list[0])
+                                else:    
+                                    pbtxt_data = parse.import_pbtxt(constants.graphs_data_path.format(gpu,model,bsize,opt,_epoch,_dset))
+                                    op_name = parse.pbtxt_extract_op_name(pbtxt_data)
+                                    dataset_op_name_list.append(op_name)
+                                    dataset_op_count_list.append({constants.hyperparam_header_2[0]: gpu, constants.hyperparam_header_2[1]: model, constants.hyperparam_header_2[2]: bsize,
+                                            constants.hyperparam_header_2[3]: opt, constants.hyperparam_header_2[4]: _epoch, constants.hyperparam_header_2[5]: _dset , constants.hyperparam_header_2[6]: len(op_name)})
      #   print(dataset_op_name_list[0])
                             except FileNotFoundError:
                                 pass 
