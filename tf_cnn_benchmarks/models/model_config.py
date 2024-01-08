@@ -41,7 +41,7 @@ _model_name_to_imagenet_model = {
     'overfeat': overfeat_model.OverfeatModel,
     
     'resnet20': resnet_model.create_resnet20_cifar_model,
-    
+    'resnet32': resnet_model.create_resnet32_cifar_model,
     'densenet40-k12': densenet_model.create_densenet40_k12_model,
     'densenet100-k12': densenet_model.create_densenet100_k12_model,
     
